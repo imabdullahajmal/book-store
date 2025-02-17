@@ -49,7 +49,57 @@ app.get('/books', async (request, response)=> {
 })
 
 
+app.get('/books/:id', async (request, response)=> {
+    try {
+        const {id} = request.params
 
+        const book = await Book.findById(id)
+        return response.status(200).json(book)
+    } catch (error) {
+        console.log(error.message)
+        response.status(500).send({msg: error.message})
+    }
+})
+
+app.put('/books/:id', async (request, response) => {
+    try {
+        if (!request.body.title ||
+            !request.body.author ||
+            !request.body.publishYear
+        ) {
+            return response.status(400).send({msg: "Send all required fields"})
+        }
+
+        const {id} = request.params
+
+        const result = await Book.findByIdAndUpdate(id, request.body)
+        if(!result) {
+            return response.status(404).json({msg: "Book not found"})
+        }
+
+        return response.status(200).json({msg: "Book updated successfully"})
+        
+    } catch(error){
+        return response.status(500).send(error.message)
+    }
+})
+
+app.delete('/books/:id', async (request, response)=> {
+    try {
+        const {id} = request.params
+
+        const result = await Book.findByIdAndDelete(id)
+
+        if(!result) {
+            return response.status(404).json({msg: "Book not found"})
+        }
+
+        return response.status(200).json({msg: "Book deleted successfully"})
+    } catch (error) {
+        console.log(error.message)
+        return response.status(500).send({msg: error.message})
+    }
+})
 
 
 mongoose.connect(DB)
